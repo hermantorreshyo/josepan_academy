@@ -1,25 +1,50 @@
 # ============================================================================
-# .htaccess para la RAÍZ del proyecto — Academia JOSEPAN 360
-# Úsalo SOLO si no puedes apuntar el DocumentRoot del subdominio a /public.
-# Renómbralo a  .htaccess  y colócalo en la raíz (junto a public/, schema.sql...).
-# Lo ideal sigue siendo apuntar el DocumentRoot a la carpeta public/.
+# Academia JOSEPAN 360 — public/.htaccess
+# Este es el DocumentRoot. No reescribe a /public (el vhost ya apunta aquí).
 # ============================================================================
 
-Options -Indexes
-DirectoryIndex public/index.php
+# Página de entrada
+DirectoryIndex index.php
 
-# Bloquear acceso directo a carpetas y archivos sensibles
-RedirectMatch 404 ^/(config|includes|sdk_omni|templates|data|lib|downloads)(/|$)
-<FilesMatch "\.(sql|md|example|log|ini|lock)$">
+# No listar directorios
+Options -Indexes
+Options +FollowSymLinks
+
+# Bloquear archivos sensibles que pudieran quedar dentro del webroot
+<FilesMatch "\.(sql|md|example|log|ini|lock|sh|bak)$">
     Require all denied
 </FilesMatch>
 
-# Reescribir todas las peticiones hacia public/
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
+# Bloquear archivos ocultos (.git, .env, .htaccess, etc.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
 
-    # No volver a reescribir lo que ya apunta a public/
-    RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^(.*)$ public/$1 [L]
+# Cabeceras de seguridad
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Strict-Transport-Security "max-age=15552000; includeSubDomains"
 </IfModule>
+
+# Compresión de texto (opcional)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# Cache de estáticos (opcional)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 7 days"
+</IfModule>
+
+# Forzar HTTPS solo si el SSL termina en ESTE Apache y no usas un vhost :80
+# de redirección (ver la guía). Descomenta si aplica:
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# </IfModule>

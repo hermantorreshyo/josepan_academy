@@ -1,0 +1,25 @@
+# ============================================================================
+# .htaccess para la RAÍZ del proyecto — Academia JOSEPAN 360
+# Úsalo SOLO si no puedes apuntar el DocumentRoot del subdominio a /public.
+# Renómbralo a  .htaccess  y colócalo en la raíz (junto a public/, schema.sql...).
+# Lo ideal sigue siendo apuntar el DocumentRoot a la carpeta public/.
+# ============================================================================
+
+Options -Indexes
+DirectoryIndex public/index.php
+
+# Bloquear acceso directo a carpetas y archivos sensibles
+RedirectMatch 404 ^/(config|includes|sdk_omni|templates|data|lib|downloads)(/|$)
+<FilesMatch "\.(sql|md|example|log|ini|lock)$">
+    Require all denied
+</FilesMatch>
+
+# Reescribir todas las peticiones hacia public/
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # No volver a reescribir lo que ya apunta a public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

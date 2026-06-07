@@ -1,0 +1,26 @@
+# Academia JOSEPAN 360 — configuración Apache (DocumentRoot = public/)
+
+# Página de entrada
+DirectoryIndex index.php
+
+# No listar directorios
+Options -Indexes
+
+# Cabeceras de seguridad básicas
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Evitar el acceso directo a archivos sensibles si se colocaran aquí
+<FilesMatch "\.(sql|md|example|log|ini)$">
+    Require all denied
+</FilesMatch>
+
+# Forzar HTTPS (descomenta en producción con certificado)
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# </IfModule>

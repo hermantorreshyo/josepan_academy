@@ -1,0 +1,3 @@
+# Carpeta no accesible vía web (fuera del DocumentRoot por diseño).
+Require all denied
+Deny from all

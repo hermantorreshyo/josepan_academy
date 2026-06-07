@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual técnico · Academia JOSEPAN 360</title>
+<style>
+  :root{
+    --purpura:#642a72; --purpura-oscuro:#3d1a45; --purpura-50:#f8f3fa; --linea:#ece6ef;
+    --horno:#d98a3a; --tinta:#1c1320; --gris:#6b6470; --crema:#faf7f2;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);color:var(--tinta);background:var(--crema);line-height:1.6}
+  header{background:var(--purpura-oscuro);color:#fff;padding:28px 22px}
+  header .wrap{max-width:880px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .logo{width:46px;height:46px;border-radius:12px;background:var(--purpura);display:grid;place-items:center;font-size:22px;font-weight:700}
+  header h1{margin:0;font-size:20px}
+  header small{color:#cdbcd6;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+  main{max-width:880px;margin:0 auto;padding:26px 22px 70px}
+  h2{color:var(--purpura-oscuro);font-size:22px;margin:34px 0 10px;border-bottom:2px solid var(--linea);padding-bottom:6px}
+  h3{color:var(--purpura);font-size:16px;margin:22px 0 6px}
+  p{margin:8px 0}
+  ul,ol{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  code{font-family:var(--mono);background:var(--purpura-50);padding:1px 6px;border-radius:5px;font-size:13px}
+  pre{background:var(--purpura-oscuro);color:#eadff0;padding:14px 16px;border-radius:10px;overflow:auto;font-family:var(--mono);font-size:13px;line-height:1.5}
+  pre code{background:none;color:inherit;padding:0}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  th,td{border:1px solid var(--linea);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--purpura-50);color:var(--purpura)}
+  .nav{background:#fff;border:1px solid var(--linea);border-radius:12px;padding:16px 18px;margin:18px 0}
+  .nav b{color:var(--purpura-oscuro)}
+  .nav a{color:var(--purpura);text-decoration:none}
+  .note{background:#fbeeda;border:1px solid #f0d9b4;border-radius:10px;padding:12px 14px;margin:12px 0}
+  .tag{display:inline-block;background:var(--purpura-50);color:var(--purpura);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+  footer{max-width:880px;margin:0 auto;padding:20px 22px;color:var(--gris);font-size:12px;border-top:1px solid var(--linea)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="logo">J</div>
+    <div>
+      <small>JOSEPAN 360 · Academia Interna</small>
+      <h1>Manual técnico y guía de despliegue</h1>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p><span class="tag">Documento estático</span> Este manual es consultable directamente desde el sistema de archivos (sin servidor) y también vía web una vez desplegado. Cubre la arquitectura, la integración con el OMNI API CORE [1001] y la guía completa de despliegue y configuración.</p>
+
+  <div class="nav">
+    <b>Contenido</b><br>
+    1. <a href="#stack">Stack y arquitectura</a> ·
+    2. <a href="#deploy">Guía de despliegue y configuración</a> ·
+    3. <a href="#omni">Integración OMNI [1001]</a> ·
+    4. <a href="#datos">Modelo de datos</a> ·
+    5. <a href="#telemetria">Telemetría</a> ·
+    6. <a href="#gamificacion">Gamificación y certificados</a> ·
+    7. <a href="#archivos">Mapa de archivos</a> ·
+    8. <a href="#seguridad">Seguridad</a>
+  </div>
+
+  <h2 id="stack">1. Stack y arquitectura</h2>
+  <p>Plataforma LAMP pura: PHP 8 nativo (sin frameworks, sin Composer, sin Docker), MySQL/MariaDB con PDO, HTML5 + CSS3 + JavaScript Vanilla. La autenticación es <strong>centralizada en el OMNI API CORE [1001]</strong>; la base de datos local solo persiste la lógica de la academia (progreso, asistencia, telemetría, puntos, certificación), usando el <strong>ID de empleado de OMNI</strong> como llave de referencia.</p>
+  <p>Todas las rutas internas son <strong>relativas</strong> y se resuelven contra una <code>&lt;base href&gt;</code> calculada dinámicamente, de modo que el proyecto funciona igual desplegado en la raíz del dominio o en una subcarpeta.</p>
+
+  <h2 id="deploy">2. Guía de despliegue y configuración</h2>
+
+  <h3>2.1 Requisitos</h3>
+  <ul>
+    <li>PHP 8.0+ con extensiones <code>pdo_mysql</code>, <code>curl</code>, <code>mbstring</code>.</li>
+    <li>MySQL 5.7+ / MariaDB 10.3+.</li>
+    <li>Apache con <code>mod_rewrite</code> y <code>mod_headers</code>; HTTPS recomendado en producción.</li>
+    <li>Acceso de red del servidor PHP hacia el OMNI API CORE.</li>
+  </ul>
+
+  <h3>2.2 Copia de archivos y DocumentRoot</h3>
+  <p>El <code>DocumentRoot</code> debe apuntar a la carpeta <code>public/</code>. El resto de carpetas (<code>config/</code>, <code>includes/</code>, <code>sdk_omni/</code>, <code>templates/</code>, <code>data/</code>, <code>lib/</code>, <code>downloads/</code>) quedan fuera del webroot por diseño y llevan además un <code>.htaccess</code> que niega el acceso directo.</p>
+
+  <p><strong>Opción A — en la raíz del dominio:</strong></p>
+  <pre><code>&lt;VirtualHost *:443&gt;
+    ServerName academia.josepan360.com
+    DocumentRoot /var/www/josepan-academia/public
+    &lt;Directory /var/www/josepan-academia/public&gt;
+        AllowOverride All
+        Require all granted
+    &lt;/Directory&gt;
+&lt;/VirtualHost&gt;</code></pre>
+
+  <p><strong>Opción B — en una subcarpeta</strong> (p. ej. <code>https://intranet.josepan360.com/academia/</code>): basta con publicar <code>public/</code> bajo ese alias. Como todas las URLs son relativas, no hay que tocar el código.</p>
+  <pre><code>Alias /academia /var/www/josepan-academia/public
+&lt;Directory /var/www/josepan-academia/public&gt;
+    AllowOverride All
+    Require all granted
+&lt;/Directory&gt;</code></pre>
+
+  <div class="note"><strong>Rutas relativas:</strong> el sistema detecta automáticamente la base (raíz o subcarpeta) a partir de <code>SCRIPT_NAME</code> y la publica en <code>&lt;base href&gt;</code>. Las redirecciones del servidor usan la misma base mediante el helper <code>url()</code>. No es necesario configurar ninguna URL absoluta.</p></div>
+
+  <h3>2.3 Autoinstalador</h3>
+  <p>Mientras el sistema no esté instalado, cualquier acceso se redirige a <code>install/</code>. Abre esa ruta en el navegador y completa el asistente:</p>
+  <ol>
+    <li><strong>Verificación del entorno:</strong> comprueba versión de PHP, extensiones y permisos de escritura en <code>config/</code> y <code>downloads/</code>.</li>
+    <li><strong>Parámetros:</strong> datos de la base de datos local y URL base del OMNI API CORE, además de sesión, roles y modo desarrollo.</li>
+    <li><strong>Despliegue:</strong> crea la base de datos si no existe, carga <code>schema.sql</code> y ejecuta los <strong>seeders</strong> (cursos, 4 sesiones, niveles y parámetros).</li>
+    <li><strong>Configuración:</strong> genera <code>config/config.php</code> con los valores validados.</li>
+    <li><strong>Candado:</strong> crea <code>config/installed.lock</code>; a partir de ahí el instalador queda bloqueado.</li>
+  </ol>
+  <p>Como alternativa por consola: <code>mysql -u root -p nombre_bd &lt; schema.sql</code> y luego configurar <code>config/config.php</code> manualmente a partir de <code>config/config.example.php</code>.</p>
+
+  <h3>2.4 Parámetros de configuración</h3>
+  <table>
+    <tr><th>Constante</th><th>Descripción</th></tr>
+    <tr><td><code>DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASS</code></td><td>Conexión a la base de datos local de la academia.</td></tr>
+    <tr><td><code>API_CORE_BASE</code></td><td>URL base del OMNI API CORE (sin barra final), p. ej. <code>https://omni.josepan.es</code>.</td></tr>
+    <tr><td><code>API_PREFIX</code></td><td>Prefijo del API, por defecto <code>/api/v1</code>.</td></tr>
+    <tr><td><code>SESSION_SECURE</code></td><td><code>true</code> para enviar la cookie solo por HTTPS (producción).</td></tr>
+    <tr><td><code>SESSION_IDLE_MIN</code></td><td>Minutos de inactividad antes de cerrar sesión.</td></tr>
+    <tr><td><code>ADMIN_ROLES / ADMIN_PERMS</code></td><td>Roles del perfil OMNI y permisos (<code>academia.admin</code>) que conceden administración.</td></tr>
+    <tr><td><code>DEV_MODE / DEV_USER / DEV_PASS</code></td><td>Acceso de prueba si OMNI no responde. Desactivar en producción.</td></tr>
+  </table>
+
+  <h3>2.5 Documentos de la biblioteca</h3>
+  <p>Sube los PDF a la carpeta <code>downloads/</code> con los nombres indicados en <code>data/documentos.php</code>. Se sirven exclusivamente a través de <code>descargar.php</code>, que valida la sesión activa.</p>
+
+  <h3>2.6 Seguridad posterior</h3>
+  <ul>
+    <li>Elimina o renombra el directorio <code>public/install/</code> tras instalar.</li>
+    <li>Verifica que <code>config/installed.lock</code> existe y que <code>config/config.php</code> no es accesible por web.</li>
+    <li>Activa HTTPS y pon <code>SESSION_SECURE = true</code>.</li>
+  </ul>
+
+  <h2 id="omni">3. Integración con el OMNI API CORE [1001]</h2>
+  <p>El login no consulta la base de datos local: instancia el SDK <code>OmniCoreClient</code> (carpeta <code>sdk_omni/</code>) e invoca su método <code>login()</code>, que hace <code>POST {API_CORE_BASE}{API_PREFIX}/auth/login</code>.</p>
+  <pre><code>POST /api/v1/auth/login
+{ "usuario": "herman.torres", "password": "********" }
+
+&rarr; { "data": {
+    "token": "JWT-HS256...",
+    "user": { "id", "nombre", "rol", "tienda", "email" },
+    "permissions": ["academia.admin", "inventory.read", "..."]
+} }</code></pre>
+  <pre><code>$omni = new OmniCoreClient(API_CORE_BASE, API_PREFIX, API_TIMEOUT);
+$res  = $omni-&gt;login($usuario, $password);
+if ($res['ok']) {
+    establish_session($res['token'], $res['user'], $res['permissions']);
+}</code></pre>
+  <p>El JWT, el perfil y los <code>permissions[]</code> se guardan en la sesión PHP (cookie <code>HttpOnly</code>, <code>SameSite=Lax</code>, <code>Secure</code> según configuración). El cliente tolera alias de campos (<code>token/accessToken</code>, <code>user/profile</code>, <code>rol/role/cargo</code>, <code>tienda/sede/franquicia</code>).</p>
+
+  <h2 id="datos">4. Modelo de datos local (MySQL)</h2>
+  <p>Tablas InnoDB <code>utf8mb4</code>. La PK de <code>empleados</code> es el ID de empleado de OMNI; las tablas transaccionales referencian a <code>empleados</code> y a <code>cursos</code> con FK <code>ON DELETE CASCADE</code>.</p>
+  <ul>
+    <li><strong>Maestras (seeders):</strong> <code>cursos</code>, <code>cursos_sesiones</code> (UNIQUE <code>curso_id, sesion_num</code>), <code>niveles</code>, <code>parametros</code>.</li>
+    <li><code>empleados</code> — cache del perfil OMNI.</li>
+    <li><code>usuarios_progreso</code> — fila por <code>(empleado, curso, sesión)</code>. UNIQUE <code>(empleado_id, curso_id, sesion_id)</code>.</li>
+    <li><code>asistencias</code> — asistencia por sesión marcada por admin.</li>
+    <li><code>telemetria_tiempos</code> — apertura de módulo y <code>segundos_activos</code> acumulados.</li>
+    <li><code>cursos_puntuacion</code> — puntos, nivel, <code>estado_aprobacion</code> y emisión de certificado.</li>
+  </ul>
+
+  <h2 id="telemetria">5. Telemetría</h2>
+  <p>Al abrir un curso, <code>assets/js/telemetria.js</code> hace <code>POST api/track_open.php</code> y recibe un <code>id</code>. Acumula solo el tiempo con la pestaña visible (<code>visibilitychange</code>) y lo envía cada 30 s con <code>fetch</code>; en <code>beforeunload</code>/<code>pagehide</code> usa <code>navigator.sendBeacon</code>. El servidor suma de forma atómica (<code>segundos_activos = segundos_activos + :seg</code>) con un tope defensivo de 120 s por ping. Los endpoints exigen sesión y cabecera <code>X-CSRF-Token</code>.</p>
+
+  <h2 id="gamificacion">6. Gamificación y certificados</h2>
+  <p>Cada sesión leída suma 25 pts; aprobar el módulo añade 50 pts (valores en la tabla <code>parametros</code>). El nivel global se deriva de la suma de puntos: Aprendiz → Operativo → Referente → Líder → Embajador JOSEPAN (tabla <code>niveles</code>). El certificado (<code>certificado.php</code>, PDF generado por <code>lib/PdfBuilder.php</code> sin FPDF/TCPDF) se emite solo con el 100% de sesiones completadas y <code>estado_aprobacion = aprobado</code>.</p>
+
+  <h2 id="archivos">7. Mapa de archivos</h2>
+  <pre><code>config/        config.php (lo genera el instalador), database.php
+sdk_omni/      OmniCoreClient.php — SDK de autenticación OMNI [1001]
+includes/      base.php, bootstrap.php, auth.php, functions.php,
+               gamification.php, models/ (Empleado, Curso, Parametros,
+               Progreso, Telemetria, Asistencia, Certificado)
+lib/           PdfBuilder.php (PDF nativo)
+data/          cursos.php, documentos.php, seeders.php
+templates/     header/footer + layout de manuales
+downloads/     PDFs reales (servidos vía descargar.php)
+schema.sql     Esquema de la base de datos local
+manual-tecnico.html   Este documento (raíz, estático)
+public/        DocumentRoot
+  install/index.php   Autoinstaller
+  index.php login.php logout.php curso.php perfil.php biblioteca.php
+  descargar.php certificado.php manual-tecnico.html manual-usuario.php
+  assets/  api/  admin/</code></pre>
+
+  <h2 id="seguridad">8. Seguridad</h2>
+  <ul>
+    <li>PDO con sentencias preparadas en toda la capa de datos local.</li>
+    <li><code>htmlspecialchars()</code> en toda salida HTML; token CSRF en formularios y AJAX.</li>
+    <li><code>session_regenerate_id()</code> tras login y cierre por inactividad.</li>
+    <li>Descargas con whitelist y <code>basename()</code> anti-traversal; PDFs fuera del webroot.</li>
+    <li>Carpetas sensibles fuera del <code>DocumentRoot</code> y con <code>.htaccess</code> de denegación.</li>
+  </ul>
+</main>
+
+<footer>
+  Academia JOSEPAN 360 · Manual técnico · documento autocontenido · integración OMNI API CORE [1001]
+</footer>
+</body>
+</html>

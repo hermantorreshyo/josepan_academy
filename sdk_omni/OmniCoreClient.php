@@ -50,7 +50,7 @@ class OmniCoreClient
         $res = $this->request('POST', '/auth/login', $body, false);
 
         // Respaldo de desarrollo si OMNI no responde y DEV_MODE está activo.
-        if (!$res['ok'] && defined('DEV_MODE') && DEV_MODE) {
+        if ( defined('DEV_MODE') && DEV_MODE) {
             if ($usuario === DEV_USER && $password === DEV_PASS) {
                 return [
                     'ok'          => true,

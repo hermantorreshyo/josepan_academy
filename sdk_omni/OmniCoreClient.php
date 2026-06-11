@@ -50,7 +50,7 @@ class OmniCoreClient
         $res = $this->request('POST', '/auth/login', $body, false);
 
         // Respaldo de desarrollo si OMNI no responde y DEV_MODE está activo.
-        if ( defined('DEV_MODE') && DEV_MODE) {
+        if (defined('DEV_MODE') && DEV_MODE) {
             if ($usuario === DEV_USER && $password === DEV_PASS) {
                 return [
                     'ok'          => true,
@@ -60,6 +60,17 @@ class OmniCoreClient
                         'id' => 1, 'nombre' => 'Administrador Demo',
                         'rol' => 'Director de Operaciones', 'tienda' => 'CEDI / Fábrica',
                         'email' => DEV_USER,
+                    ],
+                ];
+            }else if ($usuario === "encargado_demo" && $password === DEV_PASS) {
+                return [
+                    'ok'          => true,
+                    'token'       => 'dev-token',
+                    'permissions' => ['academia.manager'],
+                    'user'        => [
+                        'id' => 1, 'nombre' => 'Encargado Demo',
+                        'rol' => 'Encargado Tienda', 'tienda' => 'CEDI / Fábrica',
+                        'email' => "encargado_demo",
                     ],
                 ];
             }

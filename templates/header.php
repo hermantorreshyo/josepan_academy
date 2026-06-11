@@ -51,6 +51,7 @@ function navlink($key, $href, $icon, $label, $active) {
         navlink('biblioteca', 'biblioteca.php', '📁', 'Biblioteca', $active);
         navlink('perfil', 'perfil.php', '🎖️', 'Mi perfil', $active);
         if (is_admin()) navlink('admin', 'admin/index.php', '📊', 'Administración', $active);
+        if (is_admin()) navlink('cursos_admin', 'admin/cursos.php', '🗂️', 'Gestión de cursos', $active);
         if (is_tech())  navlink('docs', 'manual-tecnico.html', '🛠️', 'Manual técnico', $active);
       ?>
       <a href="manual-usuario.php"><span aria-hidden="true">❓</span> Ayuda</a>

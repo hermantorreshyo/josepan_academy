@@ -29,6 +29,7 @@ require_once $root . '/includes/gamification.php';
 require_once $root . '/includes/models/Empleado.php';
 require_once $root . '/includes/models/Parametros.php';
 require_once $root . '/includes/models/Curso.php';
+require_once $root . '/includes/models/Adjunto.php';
 require_once $root . '/includes/models/Progreso.php';
 require_once $root . '/includes/models/Telemetria.php';
 require_once $root . '/includes/models/Asistencia.php';

@@ -184,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'insta
       <div class="stat"><b><?= (int)$seedStats['parametros'] ?></b><span>Parámetros</span></div>
     </div>
     <?php if (!empty($migrStats)): ?>
-      <p class="muted" style="font-size:12px;margin:10px 0 0">Migraciones aplicadas: <?= he(implode(', ', $migrStats)) ?>.</p>
+      <p class="muted" style="font-size:12px;margin:10px 0 0">Migraciones aplicadas: <?= e(implode(', ', $migrStats)) ?>.</p>
     <?php endif; ?>
   </div>
   <?php endif; ?>

@@ -153,7 +153,7 @@ if ($res['ok']) {
   <h2 id="datos">4. Modelo de datos local (MySQL)</h2>
   <p>Tablas InnoDB <code>utf8mb4</code>. La PK de <code>empleados</code> es el ID de empleado de OMNI; las tablas transaccionales referencian a <code>empleados</code> y a <code>cursos</code> con FK <code>ON DELETE CASCADE</code>.</p>
   <ul>
-    <li><strong>Maestras (seeders):</strong> <code>cursos</code>, <code>cursos_sesiones</code> (UNIQUE <code>curso_id, sesion_num</code>), <code>niveles</code>, <code>parametros</code>.</li>
+    <li><strong>Maestras (seeders):</strong> <code>cursos</code> (con <code>visibilidad</code>), <code>cursos_sesiones</code> (UNIQUE <code>curso_id, sesion_num</code>), <code>cursos_adjuntos</code> (archivos por sesión), <code>curso_asignaciones</code> (qué empleado ve qué curso), <code>niveles</code>, <code>parametros</code>.</li>
     <li><code>empleados</code> — cache del perfil OMNI.</li>
     <li><code>usuarios_progreso</code> — fila por <code>(empleado, curso, sesión)</code>. UNIQUE <code>(empleado_id, curso_id, sesion_id)</code>.</li>
     <li><code>asistencias</code> — asistencia por sesión marcada por admin.</li>
@@ -164,7 +164,11 @@ if ($res['ok']) {
   <h2 id="telemetria">5. Telemetría</h2>
   <p>Al abrir un curso, <code>assets/js/telemetria.js</code> hace <code>POST api/track_open.php</code> y recibe un <code>id</code>. Acumula solo el tiempo con la pestaña visible (<code>visibilitychange</code>) y lo envía cada 30 s con <code>fetch</code>; en <code>beforeunload</code>/<code>pagehide</code> usa <code>navigator.sendBeacon</code>. El servidor suma de forma atómica (<code>segundos_activos = segundos_activos + :seg</code>) con un tope defensivo de 120 s por ping. Los endpoints exigen sesión y cabecera <code>X-CSRF-Token</code>.</p>
 
-  <h2 id="gamificacion">6. Gamificación y certificados</h2>
+  <h2 id="cursos">6. Gestión de cursos (administrador)</h2>
+  <p>Desde el panel, un administrador puede crear, editar y eliminar cursos, definir su número de sesiones, editar el contenido de cada sesión (guía, video y material) y subir <strong>archivos adjuntos por sesión</strong>. Los adjuntos se guardan en <code>downloads/adjuntos/</code> (fuera del webroot) y se sirven con verificación de sesión y de acceso vía <code>adjunto.php</code>.</p>
+  <p>La <strong>visibilidad</strong> de cada curso es <code>todos</code> o <code>asignados</code>. En modo <code>asignados</code>, solo los empleados de <code>curso_asignaciones</code> ven el curso. Pantallas: <code>admin/cursos.php</code> (listado/creación), <code>admin/curso_editar.php</code> (datos + sesiones), <code>admin/sesion_editar.php</code> (contenido + adjuntos) y <code>admin/curso_asignar.php</code> (visibilidad + asignación de empleados).</p>
+
+  <h2 id="gamificacion">7. Gamificación y certificados</h2>
   <p>Cada sesión leída suma 25 pts; aprobar el módulo añade 50 pts (valores en la tabla <code>parametros</code>). El nivel global se deriva de la suma de puntos: Aprendiz → Operativo → Referente → Líder → Embajador JOSEPAN (tabla <code>niveles</code>). El certificado (<code>certificado.php</code>, PDF generado por <code>lib/PdfBuilder.php</code> sin FPDF/TCPDF) se emite solo con el 100% de sesiones completadas y <code>estado_aprobacion = aprobado</code>.</p>
 
   <h2 id="archivos">7. Mapa de archivos</h2>

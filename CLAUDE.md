@@ -64,10 +64,11 @@ Las páginas en `public/admin/` y `public/api/` suben dos niveles (`../../includ
 
 ## Base de datos
 
-- **Maestras (pobladas por el seeder):** `cursos`, `cursos_sesiones` (UNIQUE `curso_id, sesion_num`), `niveles`, `parametros`.
+- **Maestras (pobladas por el seeder):** `cursos`, `cursos_sesiones` (UNIQUE `curso_id, sesion_num`), `niveles`, `parametros`. Gestión de cursos: `cursos.visibilidad` (`todos`|`asignados`), `cursos_adjuntos` (archivos por sesión, en `downloads/adjuntos/`) y `curso_asignaciones` (qué empleado ve qué curso).
 - **Transaccionales:** `empleados` (PK = ID de OMNI, no autoincremental), `usuarios_progreso`, `asistencias`, `telemetria_tiempos`, `cursos_puntuacion`. FK a `empleados` y a `cursos` con `ON DELETE CASCADE`.
-- El **contenido de cursos** vive en BD en runtime (modelo `Curso`), pero `data/cursos.php` es la **fuente del seeder**: si cambias cursos/sesiones, edítalo ahí y reejecuta el seeder.
-- `niveles` y `parametros` son la fuente en runtime vía `Gamification::niveles()` y `Parametros::getInt()`, con respaldo a las constantes si la tabla no existe.
+- El **contenido de cursos** vive en BD en runtime (modelo `Curso`). El admin lo gestiona desde `public/admin/cursos.php` (crear/editar/eliminar, nº de sesiones), `sesion_editar.php` (contenido + adjuntos) y `curso_asignar.php` (visibilidad + asignación). `data/cursos.php` solo es la **fuente del seeder** del curso por defecto.
+- **Migraciones:** `data/migraciones.php` (`jp_run_migraciones`) es idempotente y la ejecuta el instalador tras los seeders; añade columnas/tablas nuevas sin tocar contenido. Para una BD ya desplegada existe `migracion-cursos.sql`.
+- **Visibilidad:** las vistas de empleado usan `Curso::visiblesPara($empId, is_admin())` y `Curso::esVisiblePara(...)`; los endpoints (`complete_session.php`, `adjunto.php`, `curso.php`) verifican acceso antes de actuar.
 
 ## Convenciones de código
 

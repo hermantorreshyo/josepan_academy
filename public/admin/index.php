@@ -37,6 +37,7 @@ require __DIR__ . '/../../templates/header.php';
 </div>
 
 <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+  <a class="btn ghost sm" href="admin/cursos.php">🗂️ Gestión de cursos</a>
   <a class="btn ghost sm" href="admin/asistencia.php">✅ Control de asistencia</a>
   <a class="btn ghost sm" href="admin/aprobacion.php">🎓 Aprobación de módulos</a>
 </div>

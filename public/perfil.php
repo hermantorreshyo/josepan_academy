@@ -3,9 +3,9 @@ require_once __DIR__ . '/../includes/bootstrap.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_login();
 
-$cursos = Curso::all();
 $u = current_user();
 $empId = (int)($u['id'] ?? 0);
+$cursos = Curso::visiblesPara($empId, is_admin());
 
 $puntosGlobales = Progreso::puntosGlobales($empId);
 $nivel = Gamification::estado($puntosGlobales);

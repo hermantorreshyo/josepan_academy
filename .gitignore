@@ -1,6 +1,3 @@
 config/config.php
 downloads/*.pdf
 *.log
-config/installed.lock
-josepan_360.code-workspace
-public/omni_debug.php

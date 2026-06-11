@@ -3,9 +3,9 @@ require_once __DIR__ . '/../includes/bootstrap.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_login();
 
-$cursos = Curso::all();
 $u = current_user();
 $empId = (int)($u['id'] ?? 0);
+$cursos = Curso::visiblesPara($empId, is_admin());
 
 $pageTitle = 'Cursos';
 $pageActive = 'cursos';
@@ -18,6 +18,9 @@ require __DIR__ . '/../templates/header.php';
 </div>
 
 <div class="grid cols-2">
+<?php if (!$cursos): ?>
+  <div class="card pad muted">Aún no tienes cursos asignados. Cuando un administrador te asigne formaciones, aparecerán aquí.</div>
+<?php endif; ?>
 <?php foreach ($cursos as $c):
     $total = (int)$c['num_sesiones'];
     $hechas = Progreso::sesionesCompletadas($empId, $c['id']);

@@ -9,6 +9,12 @@ if (!$curso) { http_response_code(404); die('Curso no encontrado.'); }
 
 $u = current_user();
 $empId = (int)($u['id'] ?? 0);
+
+if (!Curso::esVisiblePara($id, $empId, is_admin())) {
+    http_response_code(403);
+    die('No tienes acceso a este curso.');
+}
+
 $total = count($curso['sesiones']);
 
 $completadas = Progreso::sesionesIds($empId, $id);
@@ -100,6 +106,22 @@ require __DIR__ . '/../templates/header.php';
               <a class="code" style="background:#fff;border:1px solid var(--linea);border-radius:7px;padding:4px 8px" href="biblioteca.php?q=<?= e($m) ?>"><?= e($m) ?></a>
             <?php endforeach; ?>
           </div>
+        </div>
+      <?php endif; ?>
+
+      <?php $adjuntos = Adjunto::listar($curso['curso_id'], (int)$s['id']); ?>
+      <?php if ($adjuntos): ?>
+        <div style="border:1px solid var(--linea);border-radius:10px;padding:12px 14px;margin-top:12px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--purpura-500);margin-bottom:8px">Archivos adjuntos</div>
+          <ul style="list-style:none;margin:0;padding:0">
+            <?php foreach ($adjuntos as $adj): ?>
+              <li style="display:flex;align-items:center;gap:10px;padding:6px 0">
+                <span aria-hidden="true">📎</span>
+                <a href="adjunto.php?id=<?= (int)$adj['id'] ?>" style="flex:1"><?= e($adj['nombre']) ?></a>
+                <span class="muted" style="font-size:12px"><?= number_format($adj['tamano'] / 1024, 0) ?> KB</span>
+              </li>
+            <?php endforeach; ?>
+          </ul>
         </div>
       <?php endif; ?>
 
